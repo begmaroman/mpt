@@ -12,26 +12,12 @@ func main() {
 	trie := mpt.NewTrie()
 
 	for i := 0; i < 10; i++ {
-		node, _ := mpt.InitNode([]byte(fmt.Sprintf("testKey%d", i)))
-		trie.Add(node)
+		trie.Add([]byte(fmt.Sprintf("testKey%d", i)))
 	}
 
 	root := trie.Root()
 
-	sum, _ := root.Checksum()
-	leftSum, _ := root.Left.Checksum()
-	rightSum, _ := root.Right.Checksum()
-
-	hash := sha1.New()
-	hash.Write(leftSum)
-	hash.Write(rightSum)
-
-	fmt.Printf("parent   sum: %v\n", sum)
-	fmt.Printf("left     sum: %v\n", leftSum)
-	fmt.Printf("right    sum: %v\n", rightSum)
-	fmt.Printf("expected sum: %v\n", hash.Sum(nil))
-
-	dumpNode(trie.Root())
+	dumpNode(root)
 }
 
 func dumpNode(node *mpt.Node) {
@@ -39,19 +25,19 @@ func dumpNode(node *mpt.Node) {
 		return
 	}
 
-	sum, _ := node.Checksum()
+	sum := node.Checksum()
 
 	if node.IsLeaf() {
 		//fmt.Printf("value: %s, checksum: %v, is leaf \n", node.Value, sum)
 		return
 	}
 
-	leftSum, _ := node.Left.Checksum()
-	rightSum, _ := node.Right.Checksum()
+	node.Left.LoadChecksum()
+	node.Right.LoadChecksum()
 
 	hash := sha1.New()
-	hash.Write(leftSum)
-	hash.Write(rightSum)
+	hash.Write(node.Left.Checksum())
+	hash.Write(node.Right.Checksum())
 
 	fmt.Printf("value: %v, valid checksum: %t \n", node.Value, reflect.DeepEqual(hash.Sum(nil), sum))
 

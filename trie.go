@@ -2,6 +2,8 @@ package mpt
 
 type Trie struct {
 	root *Node
+
+	nodes []*Node
 }
 
 func NewTrie() *Trie {
@@ -12,17 +14,21 @@ func (t *Trie) Root() *Node {
 	return t.root
 }
 
-func (t *Trie) Leafs() []*Node {
-	return t.root.leaf(nil)
-}
+// Add add new Node to trie.
+func (t *Trie) Add(value []byte) error {
+	node := NewNode()
+	node.Value = value
+	if err := node.LoadChecksum(); err != nil {
+		return err
+	}
 
-func (t *Trie) Add(node *Node) error {
 	nodes := t.root.leaf(nil)
 	nodes = append(nodes, node)
 
 	return t.build(nodes)
 }
 
+// build build Merkle Patricia Tries based nodes
 func (t *Trie) build(nodes []*Node) error {
 	if nodes == nil {
 		return nil
@@ -56,7 +62,7 @@ func buildNewLevel(nodes []*Node) ([]*Node, error) {
 				continue
 			}
 
-			n := NewEmptyNode()
+			n := NewNode()
 			n.Left = nodes[i]
 			n.Left.Parent = n
 			newNodes = append(newNodes, n)
@@ -64,12 +70,9 @@ func buildNewLevel(nodes []*Node) ([]*Node, error) {
 			n := newNodes[len(newNodes)-1]
 			n.Right = nodes[i]
 			n.Right.Parent = n
-
-			sum, err := n.Checksum()
-			if err != nil {
+			if err := n.LoadChecksum(); err != nil {
 				return nil, err
 			}
-			n.checksum = sum
 		}
 	}
 
