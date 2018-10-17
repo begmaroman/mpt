@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/begmaroman/mpt/v3"
+	"github.com/begmaroman/mpt"
 )
 
 func main() {
-	trie := mptv3.NewTrie(nil)
+	trie := mpt.NewTrie(nil)
 
 	// Created new ExtensionNode and set key and value
 	trie.Put([]byte("key"), []byte("val"))

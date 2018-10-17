@@ -1,4 +1,4 @@
-package mptv3
+package mpt
 
 type node interface {
 }

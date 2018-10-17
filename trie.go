@@ -1,4 +1,4 @@
-package mptv3
+package mpt
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ func NewTrie(node node) *Trie {
 
 // Put inserts key/value pair into tree
 func (t *Trie) Put(key, value []byte) error {
-	_, node, err := t.put(t.node, keybytesToHex(key), NewLeafNode(value))
+	_, node, err := t.put(t.node, bytesToHex(key), NewLeafNode(value))
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func (t *Trie) Put(key, value []byte) error {
 
 // Get returns value for incoming key
 func (t *Trie) Get(key []byte) ([]byte, error) {
-	val, node, resolved, err := t.get(t.node, keybytesToHex(key))
+	val, node, resolved, err := t.get(t.node, bytesToHex(key))
 	if err == nil && resolved {
 		t.node = node
 	}
