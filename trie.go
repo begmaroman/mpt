@@ -20,14 +20,14 @@ func NewTrie(node node) *Trie {
 }
 
 // Put inserts key/value pair into tree
-func (t *Trie) Put(key, value []byte) error {
-	_, node, err := t.put(t.node, bytesToHex(key), NewLeafNode(value))
-	if err != nil {
-		return err
+func (t *Trie) Put(key, value []byte) bool {
+	node, ok := t.put(t.node, bytesToHex(key), NewLeafNode(value))
+	if !ok {
+		return false
 	}
 
 	t.node = node
-	return nil
+	return true
 }
 
 // Get returns value for incoming key
@@ -45,67 +45,20 @@ func (t *Trie) Delete(key []byte) error {
 	return nil
 }
 
-func (t *Trie) put(n node, key []byte, value node) (bool, node, error) {
+func (t *Trie) put(n node, key []byte, value node) (node, bool) {
 	if len(key) == 0 {
 		if val, ok := n.(LeafNode); ok {
-			return !bytes.Equal(val, value.(LeafNode)), value, nil
+			return value, !bytes.Equal(val, value.(LeafNode))
 		}
-		return true, value, nil
+		return value, true
 	}
 
-	switch n := n.(type) {
-	case *ExtensionNode:
-		matchKey := prefixLen(key, n.Key)
-
-		// check if key of current node is compare with key
-		if matchKey == len(n.Key) {
-			ok, nd, err := t.put(n.Value, key[matchKey:], value)
-			if !ok || err != nil {
-				return false, n, err
-			}
-			return true, NewExtensionNode(n.Key, nd), nil
-		}
-
-		var err error
-		branchNode := NewBranchNode()
-		_, branchNode.Children[n.Key[matchKey]], err = t.put(
-			nil,
-			n.Key[matchKey+1:],
-			n.Value,
-		)
-		if err != nil {
-			return false, nil, err
-		}
-
-		_, branchNode.Children[key[matchKey]], err = t.put(
-			nil,
-			key[matchKey+1:],
-			value,
-		)
-		if err != nil {
-			return false, nil, err
-		}
-
-		if matchKey == 0 {
-			return true, branchNode, nil
-		}
-
-		return true, NewExtensionNode(key[:matchKey], branchNode), nil
-	case *BranchNode:
-		ok, nd, err := t.put(n.Children[key[0]], key[1:], value)
-		if !ok || err != nil {
-			return false, n, err
-		}
-
-		newNode := n.copy()
-		newNode.Children[key[0]] = nd
-		return true, newNode, nil
-	case nil:
+	if n == nil {
 		// initialize new ExtensionNode and set key/value pair
-		return true, NewExtensionNode(key, value), nil
+		return NewExtensionNode(key, value), true
 	}
 
-	return false, nil, ErrUndefinedType
+	return n.put(key, value)
 }
 
 func (t *Trie) get(n node, key []byte) ([]byte, node, bool) {
