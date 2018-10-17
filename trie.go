@@ -109,33 +109,73 @@ func (t *Trie) put(n node, key []byte, value node) (bool, node, error) {
 }
 
 func (t *Trie) get(n node, key []byte) ([]byte, node, bool, error) {
-	switch n := n.(type) {
-	case *ExtensionNode:
-		if len(key) < len(n.Key) || !bytes.Equal(n.Key, key[:len(n.Key)]) {
-			// record not found in tree
-			return nil, n, false, nil
-		}
-
-		val, newNode, resolved, err := t.get(n.Value, key[len(n.Key):])
-		if err == nil && resolved {
-			n = n.copy()
-			n.Value = newNode
-		}
-
-		return val, n, resolved, err
-	case *BranchNode:
-		val, newNode, resolved, err := t.get(n.Children[key[0]], key[1:])
-		if err == nil && resolved {
-			n = n.copy()
-			n.Children[key[0]] = newNode
-		}
-
-		return val, n, resolved, err
-	case LeafNode:
-		return n, n, false, nil
-	case nil:
+	if n == nil {
 		return nil, nil, false, nil
 	}
 
-	return nil, nil, false, ErrUndefinedType
+	return n.find(key)
+}
+
+func (t *Trie) delete(n node, key []byte) (node, bool, error) {
+	switch n := n.(type) {
+	case *ExtensionNode:
+		matchKey := prefixLen(key, n.Key)
+
+		// if key not fully compare with node's key
+		if matchKey < len(n.Key) {
+			return n, false, nil
+		}
+
+		if matchKey == len(key) {
+			return nil, true, nil
+		}
+
+		childNode, ok, err := t.delete(n.Value, key[len(n.Key):])
+		if !ok || err != nil {
+			return n, false, err
+		}
+
+		switch childNode := childNode.(type) {
+		case *ExtensionNode:
+			return NewExtensionNode(concat(n.Key, childNode.Key...), childNode.Value), true, nil
+		default:
+			return NewExtensionNode(n.Key, childNode), true, nil
+		}
+	case *BranchNode:
+		nd, ok, err := t.delete(n.Children[key[0]], key[1:])
+		if !ok || err != nil {
+			return n, false, err
+		}
+
+		n = n.copy()
+		n.Children[key[0]] = nd
+
+		position := -1
+		for i, child := range &n.Children {
+			if child == nil {
+				continue
+			}
+
+			if position == -1 {
+				position = i
+				continue
+			}
+
+			position = -2
+			break
+		}
+
+		// TODO: realize logic
+		/*if position >= 0 {
+			if position != 16 {
+				cNode, err
+			}
+		}*/
+	case LeafNode:
+		return nil, true, nil
+	case nil:
+		return nil, false, nil
+	}
+
+	return n, false, ErrUndefinedType
 }
