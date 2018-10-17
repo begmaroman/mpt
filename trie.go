@@ -4,6 +4,16 @@ import (
 	"bytes"
 )
 
+var (
+// emptyRoot is the known root hash of an empty trie.
+//emptyRoot = HexToHash("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421")
+)
+
+// LeafCallback is a callback type invoked when a trie operation reaches a leaf
+// node. It's used by state sync and commit to allow handling external references
+// between account and storage tries.
+type LeafCallback func(leaf []byte, parent Hash) error
+
 type Trie struct {
 	node node
 }
@@ -13,6 +23,12 @@ func NewTrie(node node) *Trie {
 		node: node,
 	}
 }
+
+/*func (t *Trie) Hash() Hash {
+	hash, cached, _ := t.hashRoot(nil, nil)
+	t.node = cached
+	return BytesToHash(hash.(HashNode))
+}*/
 
 // Put inserts key/value pair into tree
 func (t *Trie) Put(key, value []byte) bool {
@@ -100,3 +116,13 @@ func (t *Trie) delete(n node, key []byte) (node, bool) {
 
 	return n.delete(key)
 }
+
+/*func (t *Trie) hashRoot(db *Database, onLeaf LeafCallback) (node, node, error) {
+	if t.node == nil {
+		return NewHashNode(emptyRoot.Bytes()), nil, nil
+	}
+	h := newHasher(t.cachegen, t.cachelimit, onLeaf)
+	defer returnHasherToPool(h)
+	return h.hash(t.root, db, true)
+}
+*/

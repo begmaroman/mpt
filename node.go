@@ -87,7 +87,10 @@ func (e *ExtensionNode) delete(key []byte) (node, bool) {
 
 	switch childNode := childNode.(type) {
 	case *ExtensionNode:
-		return NewExtensionNode(concat(e.Key, childNode.Key...), childNode.Value), true
+		r := make([]byte, len(e.Key)+len(childNode.Key))
+		copy(r, e.Key)
+		copy(r[len(e.Key):], childNode.Key)
+		return NewExtensionNode(r, childNode.Value), true
 	default:
 		return NewExtensionNode(e.Key, childNode), true
 	}
@@ -183,5 +186,24 @@ func (b LeafNode) put(key []byte, value node) (node, bool) {
 }
 
 func (b LeafNode) delete(key []byte) (node, bool) {
+	return nil, true
+}
+
+// LeafNode
+type HashNode []byte
+
+func NewHashNode(value []byte) HashNode {
+	return HashNode(value)
+}
+
+func (h HashNode) find(key []byte) ([]byte, node, bool) {
+	return h, h, true
+}
+
+func (h HashNode) put(key []byte, value node) (node, bool) {
+	return nil, false
+}
+
+func (h HashNode) delete(key []byte) (node, bool) {
 	return nil, true
 }
