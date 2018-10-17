@@ -1,7 +1,8 @@
 package mptv2
 
 const (
-	leafNode = "leaf"
+	leafNode   = "leaf"
+	branchNode = "branch"
 )
 
 type TrieNode struct {
@@ -21,4 +22,18 @@ func (t *TrieNode) hash() []byte {
 
 func (t *TrieNode) serialize() []byte {
 	return []byte{}
+}
+
+func stringToNibbles(key string) []byte {
+	bkey := []byte(key)
+	nibbles := make([]byte, (len(bkey)-1)*2)
+
+	for i := 0; i < len(bkey); i++ {
+		q := i * 2
+		nibbles[q] = bkey[i] >> 4
+		q++
+		nibbles[q] = bkey[i] % 16
+	}
+
+	return nibbles
 }

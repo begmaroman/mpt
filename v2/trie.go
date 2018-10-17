@@ -48,9 +48,10 @@ func (t *Trie) putNode(node *TrieNode) error {
 }
 
 func (t *Trie) findPath(key string) {
-
+	var stack []*TrieNode
+	targetKey := stringToNibbles(key)
 }
 
-func (t *Trie) lookUpNode(node *TrieNode) {
-
+func (t *Trie) walkTrie(node *TrieNode) {
+	t.db.Get()
 }
