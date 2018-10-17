@@ -31,13 +31,13 @@ func (t *Trie) Put(key, value []byte) error {
 }
 
 // Get returns value for incoming key
-func (t *Trie) Get(key []byte) ([]byte, error) {
-	val, node, resolved, err := t.get(t.node, bytesToHex(key))
-	if err == nil && resolved {
+func (t *Trie) Get(key []byte) ([]byte, bool) {
+	val, node, resolved := t.get(t.node, bytesToHex(key))
+	if resolved {
 		t.node = node
 	}
 
-	return val, err
+	return val, resolved
 }
 
 // Delete remove transaction based on key
@@ -108,9 +108,9 @@ func (t *Trie) put(n node, key []byte, value node) (bool, node, error) {
 	return false, nil, ErrUndefinedType
 }
 
-func (t *Trie) get(n node, key []byte) ([]byte, node, bool, error) {
+func (t *Trie) get(n node, key []byte) ([]byte, node, bool) {
 	if n == nil {
-		return nil, nil, false, nil
+		return nil, nil, false
 	}
 
 	return n.find(key)
