@@ -1,6 +1,8 @@
 package mpt
 
-import "bytes"
+import (
+	"bytes"
+)
 
 // behavior of node
 type node interface {

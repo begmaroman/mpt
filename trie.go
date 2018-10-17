@@ -46,6 +46,29 @@ func (t *Trie) Delete(key []byte) bool {
 	return true
 }
 
+// Update update value by key
+func (t *Trie) Update(key, value []byte) bool {
+	var n node
+	var ok bool
+	kHex := bytesToHex(key)
+
+	n, ok = t.delete(t.node, kHex)
+	if !ok {
+		return false
+	}
+
+	if len(value) != 0 {
+		n, ok = t.put(n, kHex, NewLeafNode(value))
+	}
+
+	if !ok {
+		return false
+	}
+
+	t.node = n
+	return true
+}
+
 func (t *Trie) put(n node, key []byte, value node) (node, bool) {
 	if len(key) == 0 {
 		if val, ok := n.(LeafNode); ok {
