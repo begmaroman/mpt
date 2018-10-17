@@ -39,7 +39,7 @@ func dumpNode(node *mpt.Node) {
 	hash.Write(node.Left.Checksum())
 	hash.Write(node.Right.Checksum())
 
-	fmt.Printf("value: %v, valid checksum: %t \n", node.Value, reflect.DeepEqual(hash.Sum(nil), sum))
+	fmt.Printf("valid checksum: %t \n", reflect.DeepEqual(hash.Sum(nil), sum))
 
 	dumpNode(node.Left)
 	dumpNode(node.Right)

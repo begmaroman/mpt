@@ -74,6 +74,7 @@ func (n *Node) calculateChecksum() ([]byte, error) {
 		if rightSum.err != nil {
 			return nil, rightSum.err
 		}
+
 		if _, err := hash.Write(rightSum.checksum); err != nil {
 			return nil, err
 		}
@@ -87,22 +88,27 @@ func (n *Node) calculateChecksum() ([]byte, error) {
 }
 
 // leaf collect all leaf of a trie
-func (n *Node) leaf(nodes []*Node) []*Node {
-	if n == nil {
-		return nil
-	}
+func (n *Node) leaf() []*Node {
+	var getLeaf func(n *Node, nodes []*Node) []*Node
+	getLeaf = func(n *Node, nodes []*Node) []*Node {
+		if n == nil {
+			return nil
+		}
 
-	if nodes == nil {
-		nodes = make([]*Node, 0, 2)
-	}
+		if nodes == nil {
+			nodes = make([]*Node, 0, 2)
+		}
 
-	if n.IsLeaf() {
-		nodes = append(nodes, n)
+		if n.IsLeaf() {
+			nodes = append(nodes, n)
+			return nodes
+		}
+
+		nodes = getLeaf(n, nodes)
+		nodes = getLeaf(n, nodes)
+
 		return nodes
 	}
 
-	nodes = n.Left.leaf(nodes)
-	nodes = n.Right.leaf(nodes)
-
-	return nodes
+	return getLeaf(n, nil)
 }

@@ -10,6 +10,7 @@ func NewTrie() *Trie {
 	return &Trie{}
 }
 
+// Root returns Merkle Root
 func (t *Trie) Root() *Node {
 	return t.root
 }
@@ -22,7 +23,7 @@ func (t *Trie) Add(value []byte) error {
 		return err
 	}
 
-	nodes := t.root.leaf(nil)
+	nodes := t.root.leaf()
 	nodes = append(nodes, node)
 
 	return t.build(nodes)
