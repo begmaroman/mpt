@@ -6,6 +6,7 @@ import "bytes"
 type node interface {
 	find([]byte) ([]byte, node, bool)
 	put([]byte, node) (node, bool)
+	delete([]byte) (node, bool)
 }
 
 // ExtensionNode
@@ -65,6 +66,31 @@ func (e *ExtensionNode) put(key []byte, value node) (node, bool) {
 	return NewExtensionNode(key[:matchKey], branchNode), true
 }
 
+func (e *ExtensionNode) delete(key []byte) (node, bool) {
+	matchKey := prefixLen(key, e.Key)
+
+	// if key not fully compare with node's key
+	if matchKey < len(e.Key) {
+		return e, false
+	}
+
+	if matchKey == len(key) {
+		return nil, true
+	}
+
+	childNode, ok := e.Value.delete(key[len(e.Key):])
+	if !ok {
+		return e, false
+	}
+
+	switch childNode := childNode.(type) {
+	case *ExtensionNode:
+		return NewExtensionNode(concat(e.Key, childNode.Key...), childNode.Value), true
+	default:
+		return NewExtensionNode(e.Key, childNode), true
+	}
+}
+
 // BranchNode
 type BranchNode struct {
 	Children [17]node
@@ -101,6 +127,44 @@ func (b *BranchNode) put(key []byte, value node) (node, bool) {
 	return newNode, true
 }
 
+func (b *BranchNode) delete(key []byte) (node, bool) {
+	nd, ok := b.Children[key[0]].delete(key[1:])
+	if !ok {
+		return b, false
+	}
+
+	newNode := b.copy()
+	newNode.Children[key[0]] = nd
+
+	position := -1
+	for i, child := range &newNode.Children {
+		if child == nil {
+			continue
+		}
+
+		if position == -1 {
+			position = i
+			continue
+		}
+
+		position = -2
+		break
+	}
+
+	if position >= 0 {
+		if position != 16 {
+			if cNode, ok := newNode.Children[position].(*ExtensionNode); ok {
+				k := append([]byte{byte(position)}, cNode.Key...)
+				return NewExtensionNode(k, cNode.Value), true
+			}
+		}
+
+		return NewExtensionNode([]byte{byte(position)}, newNode.Children[position]), true
+	}
+
+	return newNode, true
+}
+
 // LeafNode
 type LeafNode []byte
 
@@ -114,4 +178,8 @@ func (b LeafNode) find(key []byte) ([]byte, node, bool) {
 
 func (b LeafNode) put(key []byte, value node) (node, bool) {
 	return nil, false
+}
+
+func (b LeafNode) delete(key []byte) (node, bool) {
+	return nil, true
 }

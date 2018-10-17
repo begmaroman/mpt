@@ -15,6 +15,12 @@ func main() {
 	trie.Put([]byte("key_new"), []byte("val_new"))
 
 	found, ok := trie.Get([]byte("key_new"))
-	fmt.Println("found value:", string(found))
-	fmt.Println("ok:", ok)
+	fmt.Println("value:", string(found))
+	fmt.Println("found:", ok)
+
+	ok = trie.Delete([]byte("key_new"))
+	fmt.Println("deleted:", ok)
+	found, ok = trie.Get([]byte("key_new"))
+	fmt.Println("value:", string(found))
+	fmt.Println("found:", ok)
 }

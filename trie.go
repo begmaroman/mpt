@@ -2,11 +2,6 @@ package mpt
 
 import (
 	"bytes"
-	"errors"
-)
-
-var (
-	ErrUndefinedType = errors.New("undefined node type")
 )
 
 type Trie struct {
@@ -40,9 +35,15 @@ func (t *Trie) Get(key []byte) ([]byte, bool) {
 	return val, resolved
 }
 
-// Delete remove transaction based on key
-func (t *Trie) Delete(key []byte) error {
-	return nil
+// Delete remove key/value par from chain
+func (t *Trie) Delete(key []byte) bool {
+	n, ok := t.delete(t.node, bytesToHex(key))
+	if !ok {
+		return false
+	}
+
+	t.node = n
+	return true
 }
 
 func (t *Trie) put(n node, key []byte, value node) (node, bool) {
@@ -69,66 +70,10 @@ func (t *Trie) get(n node, key []byte) ([]byte, node, bool) {
 	return n.find(key)
 }
 
-func (t *Trie) delete(n node, key []byte) (node, bool, error) {
-	switch n := n.(type) {
-	case *ExtensionNode:
-		matchKey := prefixLen(key, n.Key)
-
-		// if key not fully compare with node's key
-		if matchKey < len(n.Key) {
-			return n, false, nil
-		}
-
-		if matchKey == len(key) {
-			return nil, true, nil
-		}
-
-		childNode, ok, err := t.delete(n.Value, key[len(n.Key):])
-		if !ok || err != nil {
-			return n, false, err
-		}
-
-		switch childNode := childNode.(type) {
-		case *ExtensionNode:
-			return NewExtensionNode(concat(n.Key, childNode.Key...), childNode.Value), true, nil
-		default:
-			return NewExtensionNode(n.Key, childNode), true, nil
-		}
-	case *BranchNode:
-		nd, ok, err := t.delete(n.Children[key[0]], key[1:])
-		if !ok || err != nil {
-			return n, false, err
-		}
-
-		n = n.copy()
-		n.Children[key[0]] = nd
-
-		position := -1
-		for i, child := range &n.Children {
-			if child == nil {
-				continue
-			}
-
-			if position == -1 {
-				position = i
-				continue
-			}
-
-			position = -2
-			break
-		}
-
-		// TODO: realize logic
-		/*if position >= 0 {
-			if position != 16 {
-				cNode, err
-			}
-		}*/
-	case LeafNode:
-		return nil, true, nil
-	case nil:
-		return nil, false, nil
+func (t *Trie) delete(n node, key []byte) (node, bool) {
+	if n == nil {
+		return nil, false
 	}
 
-	return n, false, ErrUndefinedType
+	return n.delete(key)
 }
