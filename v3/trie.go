@@ -19,6 +19,18 @@ func NewTrie(node node) *Trie {
 	}
 }
 
+// Put inserts key/value pair into tree
+func (t *Trie) Put(key, value []byte) error {
+	_, node, err := t.put(t.node, keybytesToHex(key), NewLeafNode(value))
+	if err != nil {
+		return err
+	}
+
+	t.node = node
+	return nil
+}
+
+// Get returns value for incoming key
 func (t *Trie) Get(key []byte) ([]byte, error) {
 	val, node, resolved, err := t.get(t.node, keybytesToHex(key))
 	if err == nil && resolved {
@@ -28,18 +40,12 @@ func (t *Trie) Get(key []byte) ([]byte, error) {
 	return val, err
 }
 
-// Put inserts key/value pair into tree
-func (t *Trie) Put(key, value []byte) error {
-	_, node, err := t.put(t.node, keybytesToHex(key), NewLeafNode(value), nil)
-	if err != nil {
-		return err
-	}
-
-	t.node = node
+// Delete remove transaction based on key
+func (t *Trie) Delete(key []byte) error {
 	return nil
 }
 
-func (t *Trie) put(n node, key []byte, value node, prefix []byte) (bool, node, error) {
+func (t *Trie) put(n node, key []byte, value node) (bool, node, error) {
 	if len(key) == 0 {
 		if val, ok := n.(LeafNode); ok {
 			return !bytes.Equal(val, value.(LeafNode)), value, nil
@@ -53,7 +59,7 @@ func (t *Trie) put(n node, key []byte, value node, prefix []byte) (bool, node, e
 
 		// check if key of current node is compare with key
 		if matchKey == len(n.Key) {
-			ok, nd, err := t.put(n.Value, key[matchKey:], value, append(prefix, key[:matchKey]...))
+			ok, nd, err := t.put(n.Value, key[matchKey:], value)
 			if !ok || err != nil {
 				return false, n, err
 			}
@@ -66,7 +72,6 @@ func (t *Trie) put(n node, key []byte, value node, prefix []byte) (bool, node, e
 			nil,
 			n.Key[matchKey+1:],
 			n.Value,
-			append(prefix, n.Key[:matchKey+1]...),
 		)
 		if err != nil {
 			return false, nil, err
@@ -76,7 +81,6 @@ func (t *Trie) put(n node, key []byte, value node, prefix []byte) (bool, node, e
 			nil,
 			key[matchKey+1:],
 			value,
-			append(prefix, key[:matchKey+1]...),
 		)
 		if err != nil {
 			return false, nil, err
@@ -88,7 +92,7 @@ func (t *Trie) put(n node, key []byte, value node, prefix []byte) (bool, node, e
 
 		return true, NewExtensionNode(key[:matchKey], branchNode), nil
 	case *BranchNode:
-		ok, nd, err := t.put(n.Children[key[0]], key[1:], value, append(prefix, key[0]))
+		ok, nd, err := t.put(n.Children[key[0]], key[1:], value)
 		if !ok || err != nil {
 			return false, n, err
 		}

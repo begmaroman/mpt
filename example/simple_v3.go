@@ -14,7 +14,7 @@ func main() {
 	// Created BranchNode and insert into ExtensionNode
 	trie.Put([]byte("key_new"), []byte("val_new"))
 
-	found, err := trie.Get([]byte("key"))
+	found, err := trie.Get([]byte("key_new"))
 	fmt.Println("found value:", string(found))
 	fmt.Println("error:", err)
 }
