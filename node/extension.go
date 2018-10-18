@@ -44,7 +44,7 @@ func (e *ExtensionNode) Find(key []byte) ([]byte, Node, bool) {
 
 func (e *ExtensionNode) Put(key []byte, value Node) (Node, bool) {
 	if e.Key == nil {
-
+		return NewExtensionNode(key, value), true
 	}
 
 	matchKey := enc.PrefixLen(key, e.Key)

@@ -15,7 +15,7 @@ func NewDatabase() *Database {
 	return &Database{}
 }
 
-func (db *Database) GetNode(hash enc.Hash, cGen uint16) node.Node {
+func (db *Database) GetNode(hash enc.Hash) node.Node {
 	return nil
 }
 

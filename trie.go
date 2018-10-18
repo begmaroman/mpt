@@ -14,14 +14,16 @@ var (
 type Trie struct {
 	db   *Database
 	node node.Node
-
-	cGen, cLimit uint16
 }
 
 func NewTrie(node node.Node) *Trie {
 	return &Trie{
 		node: node,
 	}
+}
+
+func NewEmptyTrie() *Trie {
+	return &Trie{}
 }
 
 // Hash calculate and return hash of the tree
@@ -144,7 +146,7 @@ func (t *Trie) resolve(n node.Node, prefix []byte) (node.Node, error) {
 func (t *Trie) resolveHash(n node.HashNode, prefix []byte) (node.Node, error) {
 	hash := n.Hash() // get hash of HashNode
 
-	if nd := t.db.GetNode(hash, t.cGen); nd != nil { // lookup node.Node in database
+	if nd := t.db.GetNode(hash); nd != nil { // lookup node.Node in database
 		return nd, nil // return node.Node from database if exist
 	}
 

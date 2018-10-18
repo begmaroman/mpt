@@ -246,10 +246,26 @@ func TestTrie_PutDeleteAndCheck(t *testing.T) {
 	}
 }
 
-func TestTrie_CustomStartNode(t *testing.T) {
+func TestTrie_CustomStartNode_BranchNode_Empty(t *testing.T) {
 	key, val := []byte("test"), []byte("test value")
 
 	trie := mpt.NewTrie(node.NewBranchNode())
+	trie.Put(key, val)
+
+	rVal, ok := trie.Get([]byte("test"))
+	if !ok {
+		t.Errorf("lookup failed for key %s", key)
+	}
+
+	if !bytes.Equal(rVal, val) {
+		t.Errorf("check added: invalid value: expected %s got %s", val, rVal)
+	}
+}
+
+func TestTrie_CustomStartNode_ExtensionNode_Empty(t *testing.T) {
+	key, val := []byte("test"), []byte("test value")
+
+	trie := mpt.NewTrie(node.NewExtensionNode(nil, nil))
 	trie.Put(key, val)
 
 	rVal, ok := trie.Get([]byte("test"))
