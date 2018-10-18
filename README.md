@@ -144,3 +144,7 @@ fmt.Println("hash of the trie:", h)
 |BenchmarkTrie_Put/ToEmptyTrie-4|3000000|524 ns/op|Put data to empty tree|
 |BenchmarkTrie_Update/FullTrie100000-4|1000000|3083 ns/op|Update data in the tree which have 100000 key/value pairs|
 |BenchmarkTrie_Update/EmptyTrie-4|2000000|674 ns/op|Update data in empty tree|
+
+## Backlog
+
+- Implement Database layer - need for store tree
