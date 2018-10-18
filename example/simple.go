@@ -21,7 +21,7 @@ func main() {
 	fmt.Println()
 
 	// try to update value
-	ok, _ = trie.Update([]byte("key_new"), []byte("val_new_updated"))
+	ok = trie.Update([]byte("key_new"), []byte("val_new_updated"))
 	fmt.Println("updated:", ok)
 	fmt.Println()
 
@@ -31,8 +31,10 @@ func main() {
 	fmt.Println("found:", ok)
 	fmt.Println()
 
-	ok, _ = trie.Delete([]byte("key_new"))
+	ok = trie.Delete([]byte("key_new"))
 	fmt.Println("deleted:", ok)
+	fmt.Println()
+
 	found, ok = trie.Get([]byte("key_new"))
 	fmt.Println("value:", string(found))
 	fmt.Println("found:", ok)

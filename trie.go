@@ -37,14 +37,14 @@ func (t *Trie) Hash() (enc.Hash, error) {
 }
 
 // Put inserts key/value pair into tree
-func (t *Trie) Put(key, value []byte) (bool, error) {
-	nd, ok, err := t.put(t.node, enc.BytesToHex(key), node.NewLeafNode(value), nil)
-	if !ok || err != nil {
-		return false, err
+func (t *Trie) Put(key, value []byte) bool {
+	nd, ok := t.put(t.node, enc.BytesToHex(key), node.NewLeafNode(value), nil)
+	if !ok {
+		return false
 	}
 
 	t.node = nd
-	return true, nil
+	return true
 }
 
 // Get returns value for incoming key
@@ -58,68 +58,52 @@ func (t *Trie) Get(key []byte) ([]byte, bool) {
 }
 
 // Delete remove key/value par from chain
-func (t *Trie) Delete(key []byte) (bool, error) {
-	n, ok, err := t.delete(t.node, enc.BytesToHex(key), nil)
-	if !ok || err != nil {
-		return false, err
+func (t *Trie) Delete(key []byte) bool {
+	n, ok := t.delete(t.node, enc.BytesToHex(key), nil)
+	if !ok {
+		return false
 	}
 
 	t.node = n
-	return true, nil
+	return true
 }
 
 // Update update value by key
-func (t *Trie) Update(key, value []byte) (bool, error) {
+func (t *Trie) Update(key, value []byte) bool {
 	var n node.Node
 	var ok bool
-	var err error
 	kHex := enc.BytesToHex(key)
 
-	n, ok, err = t.delete(t.node, kHex, nil)
-	if !ok || err != nil {
-		return false, err
+	n, ok = t.delete(t.node, kHex, nil)
+	if !ok {
+		return false
 	}
 
 	if len(value) != 0 {
-		n, ok, err = t.put(n, kHex, node.NewLeafNode(value), nil)
-		if !ok || err != nil {
-			return false, err
+		n, ok = t.put(n, kHex, node.NewLeafNode(value), nil)
+		if !ok {
+			return false
 		}
 	}
 
 	t.node = n
-	return true, nil
+	return true
 }
 
-func (t *Trie) put(n node.Node, key []byte, value node.Node, prefix []byte) (node.Node, bool, error) {
+func (t *Trie) put(n node.Node, key []byte, value node.Node, prefix []byte) (node.Node, bool) {
 	if len(key) == 0 {
 		if val, ok := n.(node.LeafNode); ok {
-			return value, !bytes.Equal(val, value.(node.LeafNode)), nil
+			return value, !bytes.Equal(val, value.(node.LeafNode))
 		}
-		return value, true, nil
+		return value, true
 	}
 
 	if n == nil {
 		// initialize new ExtensionNode and set key/value pair
-		return node.NewExtensionNode(key, value, nil), true, nil
+		return node.NewExtensionNode(key, value, nil), true
 	}
 
-	if n, ok := n.(node.HashNode); ok {
-		rn, err := t.resolveHash(n, prefix)
-		if err != nil {
-			return nil, false, err
-		}
-
-		nn, ok, err := t.put(rn, key, value, prefix)
-		if !ok || err != nil {
-			return rn, false, err
-		}
-
-		return nn, true, nil
-	}
-
-	nd, ok := n.Put(key, value)
-	return nd, ok, nil
+	return n.Put(key, value)
 }
 
 func (t *Trie) get(n node.Node, key []byte) ([]byte, node.Node, bool) {
@@ -130,27 +114,12 @@ func (t *Trie) get(n node.Node, key []byte) ([]byte, node.Node, bool) {
 	return n.Find(key)
 }
 
-func (t *Trie) delete(n node.Node, key, prefix []byte) (node.Node, bool, error) {
+func (t *Trie) delete(n node.Node, key, prefix []byte) (node.Node, bool) {
 	if n == nil {
-		return nil, false, nil
+		return nil, false
 	}
 
-	if n, ok := n.(node.HashNode); ok {
-		rn, err := t.resolveHash(n, prefix)
-		if err != nil {
-			return nil, false, err
-		}
-
-		nn, ok, err := t.delete(rn, key, prefix)
-		if !ok || err != nil {
-			return rn, false, err
-		}
-
-		return nn, true, nil
-	}
-
-	nn, ok := n.Delete(key)
-	return nn, ok, nil
+	return n.Delete(key)
 }
 
 // hashToot do hash for root of tree
