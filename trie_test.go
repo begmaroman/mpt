@@ -339,9 +339,51 @@ func BenchmarkTrie_Put(b *testing.B) {
 
 	preparedExtTrie := mpt.NewTrie(node.NewExtensionNode(nil, nil))
 	preparedExtTrie.Put(key, val)
-	b.Run("ToPreparedBranchNodeEmptyTrie", func(b *testing.B) {
+	b.Run("ToPreparedExtensionNodeEmptyTrie", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			preparedExtTrie.Put(key, val)
+		}
+	})
+}
+
+func BenchmarkTrie_Update(b *testing.B) {
+	key, val := []byte("tolongwseb;kjnwkjlevnoknbkomnrwobnwotrh34y6onyo"), []byte("lwebniopwjgnipwuhgpv wrhtpovm rhiopwerhgpowuihnopwrntgmopkrtmvport uiwthgipurthg puti")
+
+	fullTrie := mpt.NewTrie(nil)
+	for j := 0; j < 100000; j++ {
+		tokenKey, tokenValue := make([]byte, 56), make([]byte, 556)
+		rand.Read(tokenKey)
+		rand.Read(tokenValue)
+		fullTrie.Put(tokenKey, tokenValue)
+	}
+	fullTrie.Put(key, val)
+	b.Run("FullTrie100000", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			fullTrie.Update(key, val)
+		}
+	})
+
+	emptyTrie := mpt.NewTrie(nil)
+	emptyTrie.Put(key, val)
+	b.Run("EmptyTrie", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			emptyTrie.Update(key, val)
+		}
+	})
+
+	preparedBranchTrie := mpt.NewTrie(node.NewBranchNode())
+	preparedBranchTrie.Put(key, val)
+	b.Run("PreparedBranchNodeEmptyTrie", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			preparedBranchTrie.Update(key, val)
+		}
+	})
+
+	preparedExtTrie := mpt.NewTrie(node.NewExtensionNode(nil, nil))
+	preparedExtTrie.Put(key, val)
+	b.Run("PreparedExtensionNodeEmptyTrie", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			preparedExtTrie.Update(key, val)
 		}
 	})
 }
