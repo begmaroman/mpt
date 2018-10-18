@@ -2,13 +2,13 @@ package mpt
 
 import (
 	"bytes"
+
 	"github.com/begmaroman/mpt/enc"
 	"github.com/begmaroman/mpt/node"
 )
 
 var (
-	// emptyRoot is the known root hash of an empty trie.
-	emptyRoot = enc.HexToHash("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421")
+	nilNode = enc.HexToHash("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421")
 )
 
 type Trie struct {
@@ -125,7 +125,7 @@ func (t *Trie) delete(n node.Node, key, prefix []byte) (node.Node, bool) {
 // hashToot do hash for root of tree
 func (t *Trie) hashRoot(db *Database) (node.Node, node.Node, error) {
 	if t.node == nil {
-		return node.NewHashNode(emptyRoot.Bytes()), nil, nil
+		return node.NewHashNode(nilNode.Bytes()), nil, nil
 	}
 	h := NewEncryptor()
 	defer hPool.Put(h)
