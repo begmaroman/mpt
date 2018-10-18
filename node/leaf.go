@@ -21,7 +21,3 @@ func (l LeafNode) Delete(key []byte) (Node, bool) {
 func (l LeafNode) Cache() ([]byte, bool) {
 	return nil, true
 }
-
-func (l LeafNode) CanUpload(gen, limit uint16) bool {
-	return false
-}

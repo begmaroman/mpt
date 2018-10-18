@@ -12,15 +12,12 @@ type ExtensionNode struct {
 
 	Hash  []byte
 	Dirty bool
-
-	Flags *Flag
 }
 
-func NewExtensionNode(key []byte, val Node, flags *Flag) *ExtensionNode {
+func NewExtensionNode(key []byte, val Node) *ExtensionNode {
 	return &ExtensionNode{
 		Key:   key,
 		Value: val,
-		Flags: flags,
 	}
 }
 
@@ -55,17 +52,17 @@ func (e *ExtensionNode) Put(key []byte, value Node) (Node, bool) {
 			return e, false
 		}
 
-		return NewExtensionNode(e.Key, nd, NewFlag(true, 0)), true
+		return NewExtensionNode(e.Key, nd), true
 	}
 
-	branchNode := NewBranchNode(NewFlag(true, 0))
-	branchNode.Children[e.Key[matchKey]] = NewExtensionNode(e.Key[matchKey+1:], e.Value, NewFlag(true, 0))
-	branchNode.Children[key[matchKey]] = NewExtensionNode(key[matchKey+1:], value, NewFlag(true, 0))
+	branchNode := NewBranchNode()
+	branchNode.Children[e.Key[matchKey]] = NewExtensionNode(e.Key[matchKey+1:], e.Value)
+	branchNode.Children[key[matchKey]] = NewExtensionNode(key[matchKey+1:], value)
 	if matchKey == 0 {
 		return branchNode, true
 	}
 
-	return NewExtensionNode(key[:matchKey], branchNode, NewFlag(true, 0)), true
+	return NewExtensionNode(key[:matchKey], branchNode), true
 }
 
 func (e *ExtensionNode) Delete(key []byte) (Node, bool) {
@@ -90,16 +87,12 @@ func (e *ExtensionNode) Delete(key []byte) (Node, bool) {
 		r := make([]byte, len(e.Key)+len(childNode.Key))
 		copy(r, e.Key)
 		copy(r[len(e.Key):], childNode.Key)
-		return NewExtensionNode(r, childNode.Value, NewFlag(true, 0)), true
+		return NewExtensionNode(r, childNode.Value), true
 	default:
-		return NewExtensionNode(e.Key, childNode, NewFlag(true, 0)), true
+		return NewExtensionNode(e.Key, childNode), true
 	}
 }
 
 func (e *ExtensionNode) Cache() ([]byte, bool) {
 	return e.Hash, e.Dirty
-}
-
-func (e *ExtensionNode) CanUpload(gen, limit uint16) bool {
-	return e.Flags.canUnload(gen, limit)
 }

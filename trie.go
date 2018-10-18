@@ -100,7 +100,7 @@ func (t *Trie) put(n node.Node, key []byte, value node.Node, prefix []byte) (nod
 
 	if n == nil {
 		// initialize new ExtensionNode and set key/value pair
-		return node.NewExtensionNode(key, value, nil), true
+		return node.NewExtensionNode(key, value), true
 	}
 
 	return n.Put(key, value)

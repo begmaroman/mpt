@@ -31,7 +31,3 @@ func (h HashNode) Delete(key []byte) (Node, bool) {
 func (h HashNode) Cache() ([]byte, bool) {
 	return nil, true
 }
-
-func (h HashNode) CanUpload(gen, limit uint16) bool {
-	return false
-}

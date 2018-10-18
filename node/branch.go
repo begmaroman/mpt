@@ -5,14 +5,10 @@ type BranchNode struct {
 
 	Hash  []byte
 	Dirty bool
-
-	Flags *Flag
 }
 
-func NewBranchNode(flags *Flag) *BranchNode {
-	return &BranchNode{
-		Flags: flags,
-	}
+func NewBranchNode() *BranchNode {
+	return &BranchNode{}
 }
 
 func (b *BranchNode) Copy() *BranchNode {
@@ -32,13 +28,20 @@ func (b *BranchNode) Find(key []byte) ([]byte, Node, bool) {
 }
 
 func (b *BranchNode) Put(key []byte, value Node) (Node, bool) {
-	nd, ok := b.Children[key[0]].Put(key[1:], value)
-	if !ok {
-		return b, false
+	var n Node
+	var ok bool
+
+	if b.Children[key[0]] == nil {
+		n = NewExtensionNode(key[1:], value)
+	} else {
+		n, ok = b.Children[key[0]].Put(key[1:], value)
+		if !ok {
+			return b, false
+		}
 	}
 
 	newNode := b.Copy()
-	newNode.Children[key[0]] = nd
+	newNode.Children[key[0]] = n
 	return newNode, true
 }
 
@@ -70,11 +73,11 @@ func (b *BranchNode) Delete(key []byte) (Node, bool) {
 		if position != 16 {
 			if cNode, ok := newNode.Children[position].(*ExtensionNode); ok {
 				k := append([]byte{byte(position)}, cNode.Key...)
-				return NewExtensionNode(k, cNode.Value, NewFlag(true, 0)), true
+				return NewExtensionNode(k, cNode.Value), true
 			}
 		}
 
-		return NewExtensionNode([]byte{byte(position)}, newNode.Children[position], NewFlag(true, 0)), true
+		return NewExtensionNode([]byte{byte(position)}, newNode.Children[position]), true
 	}
 
 	return newNode, true
@@ -82,8 +85,4 @@ func (b *BranchNode) Delete(key []byte) (Node, bool) {
 
 func (b *BranchNode) Cache() ([]byte, bool) {
 	return b.Hash, b.Dirty
-}
-
-func (b *BranchNode) CanUpload(gen, limit uint16) bool {
-	return b.Flags.canUnload(gen, limit)
 }

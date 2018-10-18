@@ -5,5 +5,4 @@ type Node interface {
 	Put([]byte, Node) (Node, bool)
 	Delete([]byte) (Node, bool)
 	Cache() ([]byte, bool)
-	CanUpload(gen, limit uint16) bool
 }
