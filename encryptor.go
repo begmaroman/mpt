@@ -77,6 +77,7 @@ func (sh *Encryptor) hash(n node.Node, db *Database, force bool) (node.Node, nod
 }
 
 // getChildHash hash children nodes
+// returns: HashNode, main node, error
 func (sh *Encryptor) getChildHash(original node.Node, db *Database) (node.Node, node.Node, error) {
 	var err error
 

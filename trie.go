@@ -92,6 +92,7 @@ func (t *Trie) Update(key, value []byte) bool {
 	return true
 }
 
+// put add new data to the node
 func (t *Trie) put(n node.Node, key []byte, value node.Node, prefix []byte) (node.Node, bool) {
 	if len(key) == 0 {
 		if val, ok := n.(node.LeafNode); ok {
@@ -108,6 +109,7 @@ func (t *Trie) put(n node.Node, key []byte, value node.Node, prefix []byte) (nod
 	return n.Put(key, value)
 }
 
+// get returns data from node by key
 func (t *Trie) get(n node.Node, key []byte) ([]byte, node.Node, bool) {
 	if n == nil {
 		return nil, nil, false
@@ -116,6 +118,7 @@ func (t *Trie) get(n node.Node, key []byte) ([]byte, node.Node, bool) {
 	return n.Find(key)
 }
 
+// delete remove daa from node by key
 func (t *Trie) delete(n node.Node, key, prefix []byte) (node.Node, bool) {
 	if n == nil {
 		return nil, false
