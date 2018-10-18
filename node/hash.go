@@ -15,12 +15,10 @@ func (h HashNode) Hash() enc.Hash {
 }
 
 func (h HashNode) Find(key []byte) ([]byte, Node, bool) {
-	// TODO: need to implement lookup logic
 	return h, h, true
 }
 
 func (h HashNode) Put(key []byte, value Node) (Node, bool) {
-	// TODO: need to implement insertion logic
 	return nil, false
 }
 

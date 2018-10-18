@@ -8,11 +8,10 @@ import (
 	"github.com/begmaroman/mpt/enc"
 )
 
-func TestBranchNode_Find(t *testing.T) {
+func TestExtensionNode_Find(t *testing.T) {
 	key, value := enc.BytesToHex([]byte("key")), []byte("value")
 
-	nd := NewBranchNode()
-	nd.Children[key[0]] = NewExtensionNode(key[1:], NewLeafNode(value))
+	nd := NewExtensionNode(key, NewLeafNode(value))
 
 	rVal, rNd, ok := nd.Find(key)
 	if !ok {
@@ -29,10 +28,10 @@ func TestBranchNode_Find(t *testing.T) {
 	}
 }
 
-func TestBranchNode_PutAndCheck(t *testing.T) {
+func TestExtensionNode_PutAndCheck(t *testing.T) {
 	key, value := enc.BytesToHex([]byte("key")), []byte("value")
 
-	nd := NewBranchNode()
+	nd := NewExtensionNode(enc.BytesToHex([]byte("k")), NewLeafNode([]byte("kat value")))
 	newNode, ok := nd.Put(key, NewLeafNode(value))
 	if !ok {
 		t.Error("put failed")
@@ -54,8 +53,8 @@ func TestBranchNode_PutAndCheck(t *testing.T) {
 	}
 }
 
-func TestBranchNode_Cache(t *testing.T) {
-	nd := NewBranchNode()
+func TestExtensionNode_Cache(t *testing.T) {
+	nd := NewExtensionNode(nil, nil)
 	nd.Hash = []byte("test")
 	nd.Dirty = true
 
