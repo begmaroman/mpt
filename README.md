@@ -2,6 +2,8 @@
 
 Simple implementation of Modified Merkle Patricia Tries on GoLang.
 
+![Modified Merkle Patricia Trie](https://i.stack.imgur.com/YZGxe.png)
+
 ## Usage
 
 1. Create the Trie:
