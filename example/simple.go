@@ -21,9 +21,9 @@ func main() {
 	fmt.Println()
 
 	// try to update value
-	//ok, _ = trie.Update([]byte("key_new"), []byte("val_new_updated"))
-	//fmt.Println("updated:", ok)
-	//fmt.Println()
+	ok, _ = trie.Update([]byte("key_new"), []byte("val_new_updated"))
+	fmt.Println("updated:", ok)
+	fmt.Println()
 
 	// try to find value
 	found, ok = trie.Get([]byte("key_new"))
