@@ -92,7 +92,6 @@ func (h *Hash) Scan(src interface{}) error {
 	return nil
 }
 
-// Useful type :)
 type SliceBuffer []byte
 
 func (b *SliceBuffer) Write(data []byte) (n int, err error) {

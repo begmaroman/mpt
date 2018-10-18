@@ -49,12 +49,17 @@ func (sh *Encryptor) hash(n node.Node, db *Database, force bool) (node.Node, nod
 		return node.NewHashNode(nil), n, err
 	}
 
-	hashed, err := sh.store(collapsed, db, force)
+	encryptedNode, err := sh.encrypt(collapsed, db, force)
 	if err != nil {
 		return node.NewHashNode(nil), n, err
 	}
 
-	cachedHash, _ := hashed.(node.HashNode)
+	if hashData, ok := encryptedNode.(node.HashNode); ok && db != nil {
+		// We are pooling the trie nodes into an intermediate memory cache
+		db.Insert(enc.BytesToHash(hashData), sh.rlpBuf, n)
+	}
+
+	cachedHash, _ := encryptedNode.(node.HashNode)
 	switch cn := cached.(type) {
 	case *node.ExtensionNode:
 		cn.Hash = cachedHash
@@ -68,7 +73,7 @@ func (sh *Encryptor) hash(n node.Node, db *Database, force bool) (node.Node, nod
 		}
 	}
 
-	return hashed, cached, nil
+	return encryptedNode, cached, nil
 }
 
 // getChildHash hash children nodes
@@ -116,7 +121,8 @@ func (sh *Encryptor) getChildHash(original node.Node, db *Database) (node.Node, 
 	}
 }
 
-func (sh *Encryptor) store(n node.Node, db *Database, force bool) (node.Node, error) {
+// encrypt returns HashNode or incomin node
+func (sh *Encryptor) encrypt(n node.Node, db *Database, force bool) (node.Node, error) {
 	// Don't store hashes or empty nodes.
 	if _, isHash := n.(node.HashNode); n == nil || isHash {
 		return n, nil
@@ -134,19 +140,15 @@ func (sh *Encryptor) store(n node.Node, db *Database, force bool) (node.Node, er
 	}
 
 	// Larger nodes are replaced by their hash and stored in the database.
-	hash, dirty := n.Cache()
-	if hash == nil || dirty {
-		hash = sh.makeHashNode(sh.rlpBuf)
+	newHash, dirty := n.Cache()
+	if newHash == nil || dirty {
+		newHash = sh.makeHashNode(sh.rlpBuf)
 	}
 
-	if db != nil {
-		// We are pooling the trie nodes into an intermediate memory cache
-		db.Insert(enc.BytesToHash(hash), sh.rlpBuf, n)
-	}
-
-	return node.NewHashNode(hash), nil
+	return node.NewHashNode(newHash), nil
 }
 
+// makeHashNode wrap data on sha3
 func (sh *Encryptor) makeHashNode(data []byte) node.HashNode {
 	n := make(node.HashNode, sh.sha.Size())
 	sh.sha.Reset()
