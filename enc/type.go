@@ -1,4 +1,4 @@
-package mpt
+package enc
 
 import (
 	"encoding/hex"
@@ -90,6 +90,18 @@ func (h *Hash) Scan(src interface{}) error {
 	}
 	copy(h[:], srcB)
 	return nil
+}
+
+// Useful type :)
+type SliceBuffer []byte
+
+func (b *SliceBuffer) Write(data []byte) (n int, err error) {
+	*b = append(*b, data...)
+	return len(data), nil
+}
+
+func (b *SliceBuffer) Reset() {
+	*b = (*b)[:0]
 }
 
 // FromHex returns the bytes represented by the hexadecimal string s.

@@ -21,9 +21,9 @@ func main() {
 	fmt.Println()
 
 	// try to update value
-	ok = trie.Update([]byte("key_new"), []byte("val_new_updated"))
-	fmt.Println("updated:", ok)
-	fmt.Println()
+	//ok, _ = trie.Update([]byte("key_new"), []byte("val_new_updated"))
+	//fmt.Println("updated:", ok)
+	//fmt.Println()
 
 	// try to find value
 	found, ok = trie.Get([]byte("key_new"))
@@ -31,9 +31,14 @@ func main() {
 	fmt.Println("found:", ok)
 	fmt.Println()
 
-	ok = trie.Delete([]byte("key_new"))
+	ok, _ = trie.Delete([]byte("key_new"))
 	fmt.Println("deleted:", ok)
 	found, ok = trie.Get([]byte("key_new"))
 	fmt.Println("value:", string(found))
 	fmt.Println("found:", ok)
+	fmt.Println()
+
+	h, err := trie.Hash()
+	fmt.Println("hash of the tree:", h.String())
+	fmt.Println("error of hash:", err)
 }

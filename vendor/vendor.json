@@ -1,0 +1,19 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "pQzUVRi0z/3Z4FpRyExSg1ROLSA=",
+			"path": "github.com/ethereum/go-ethereum/crypto/sha3",
+			"revision": "cdf5982cfca2cd7d5fea85c226af5e48fde837df",
+			"revisionTime": "2018-10-17T17:22:37Z"
+		},
+		{
+			"checksumSHA1": "zrskypwp1RbmLX2f/47diH1vxQc=",
+			"path": "github.com/ethereum/go-ethereum/rlp",
+			"revision": "cdf5982cfca2cd7d5fea85c226af5e48fde837df",
+			"revisionTime": "2018-10-17T17:22:37Z"
+		}
+	],
+	"rootPath": "github.com/begmaroman/mpt"
+}
